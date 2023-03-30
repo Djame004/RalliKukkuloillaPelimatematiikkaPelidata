@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "1085081171385",
+    "firebase_url": "https://pelidatalopputyo-36fad-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "pelidatalopputyo-36fad",
+    "storage_bucket": "pelidatalopputyo-36fad.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1085081171385:android:f3a474348f346aeade3268",
+        "android_client_info": {
+          "package_name": "com.DefaultCompany.PelidataLoppuTyo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1085081171385-k5lg7h8ofll85q5o2dum2uovr581v4v7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAZQdRLHNlsyc6K3RSqAHQ4bMpNdI1FTxg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1085081171385-k5lg7h8ofll85q5o2dum2uovr581v4v7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
