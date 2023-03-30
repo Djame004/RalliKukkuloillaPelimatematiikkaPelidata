@@ -1,63 +1,65 @@
+using System;
 using UnityEngine;
 
 public class BezierCurve : MonoBehaviour
 {
-    public Transform[] controlPoints;
-    public int curveResolution = 10;
-    public bool loop = false;
-    public Color curveColor = Color.white;
+    public Transform StartPoint;
+    public Transform[] AnchorPoints;
+    public Transform[] EndPoints;
+    public int numPoints = 50;
 
-    private void OnDrawGizmos()
+    public Vector3[] _points;
+
+    public void OnDrawGizmos()
     {
-        if (controlPoints.Length < 2)
-            return;
+        int numPairs = Mathf.Min(AnchorPoints.Length, EndPoints.Length);
+        _points = new Vector3[numPairs * numPoints];
+        int currentPoint = 0;
+        Vector3 lastPoint = StartPoint.position;
 
-        // Set the color of the Gizmos
-        Gizmos.color = curveColor;
-
-        // Draw the curve
-        for (int i = 0; i < curveResolution; i++)
+        for (int i = 0; i < numPairs; i++)
         {
-            float t1 = (float)i / curveResolution;
-            float t2 = (float)(i + 1) / curveResolution;
-            Vector3 p1 = CalculateBezierPoint(t1, controlPoints);
-            Vector3 p2 = CalculateBezierPoint(t2, controlPoints);
-            Gizmos.DrawLine(p1, p2);
+            for (int j = 0; j < numPoints; j++)
+            {
+                float t = (float)j / (numPoints - 1);
+                _points[currentPoint] = CalculateBezierPoint(t, lastPoint, AnchorPoints[i].position, EndPoints[i].position);
+                currentPoint++;
+            }
+
+            lastPoint = _points[currentPoint - 1];
         }
 
-        // If loop is enabled, draw a line from the last point to the first point
-        if (loop)
+        Gizmos.color = Color.white;
+        for (int i = 0; i < _points.Length - 1; i++)
         {
-            Vector3 p1 = CalculateBezierPoint(0f, controlPoints);
-            Vector3 p2 = CalculateBezierPoint(1f, controlPoints);
-            Gizmos.DrawLine(p2, p1);
+            Gizmos.DrawLine(_points[i], _points[i + 1]);
         }
     }
 
-    private Vector3 CalculateBezierPoint(float t, Transform[] controlPoints)
+    public Vector3 CalculateBezierPoint(float t, Vector3 p0, Vector3 p1, Vector3 p2)
     {
-        int n = controlPoints.Length - 1;
-        Vector3 point = Vector3.zero;
-        for (int i = 0; i <= n; i++)
-        {
-            float b = BinomialCoefficient(n, i) * Mathf.Pow(t, i) * Mathf.Pow(1 - t, n - i);
-            point += b * controlPoints[i].position;
-        }
-        return point;
+        float u = 1 - t;
+        float tt = t * t;
+        float uu = u * u;
+
+        Vector3 p = uu * p0;
+        p += 2 * u * t * p1;
+        p += tt * p2;
+
+        return p;
+    }
+    public Vector3 CalculateBezierPointDerivative(float t, Vector3 p0, Vector3 p1, Vector3 p2)
+    {
+        float u = 1 - t;
+        float tt = t * t;
+        float uu = u * u;
+
+        Vector3 p = -2 * u * p0;
+        p += 2 * (u - t) * p1;
+        p += 2 * t * p2;
+
+        return p.normalized;
     }
 
-    private int BinomialCoefficient(int n, int k)
-    {
-        if (k == 0 || k == n)
-        {
-            return 1;
-        }
-        int result = 1;
-        for (int i = 1; i <= k; i++)
-        {
-            result *= n - k + i;
-            result /= i;
-        }
-        return result;
-    }
+
 }
