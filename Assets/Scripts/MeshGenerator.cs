@@ -20,6 +20,8 @@ public class MeshGenerator : MonoBehaviour
 
     List<MeshVertices> meshes = new List<MeshVertices>();
     Mesh mesh;
+    List<int> triangleIndices = new List<int>();
+
 
     // Start is called before the first frame update
     void Start()
@@ -110,26 +112,49 @@ public class MeshGenerator : MonoBehaviour
                 nextMesh = meshes[i + 1];
             }
 
-            //Loop all faces that will be between two 2D meshes
+            // Loop all faces that will be between two 2D meshes
             for (int x = 0; x < meshPrefab.vertices.Length - 1; x++)
             {
-                Vector3 curVertex1 = currentMesh.vertices[i].position;
-                Vector3 curVertex2 = currentMesh.vertices[i + 1].position;
-                Vector3 nextVertex1 = nextMesh.vertices[i].position;
-                Vector3 nextVertex2 = nextMesh.vertices[i + 1].position;
+                Vector3 curVertex1 = currentMesh.vertices[x].position;
+                Vector3 curVertex2 = currentMesh.vertices[x + 1].position;
+                Vector3 nextVertex1 = nextMesh.vertices[x].position;
+                Vector3 nextVertex2 = nextMesh.vertices[x + 1].position;
 
                 //Create vertices
                 Vector3[] verts = new Vector3[]
                 {
-                curVertex1,
-                curVertex2,
-                nextVertex1,
-                nextVertex2
+       
+                    curVertex1,
+      
+                    curVertex2,
+       
+                    nextVertex1,
+       
+                    nextVertex2
                 };
 
+                //Create triangles
+                int[] Newtriangles = new int[]
+                {
+       
+                    0, 1, 2,
+       
+                    1, 3, 2
+                };
 
+                //Add indices to triangleIndices list
+                int startIndex = vertices.Count;
+                for (int j = 0; j < Newtriangles.Length; j++)
+                    triangleIndices.Add(startIndex + Newtriangles[j]);
+
+                //Add vertices to vertices list
+                vertices.AddRange(verts);
             }
+
         }
+        mesh.vertices = vertices.ToArray();
+        mesh.triangles = triangleIndices.ToArray();
+
     }
 
     void OnDrawGizmos()
