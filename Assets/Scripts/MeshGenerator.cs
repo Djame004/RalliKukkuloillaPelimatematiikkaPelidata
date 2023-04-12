@@ -12,6 +12,7 @@ public class MeshGenerator : MonoBehaviour
     [SerializeField] BezierCurve bezierCurve;
     [SerializeField] MeshVertices meshPrefab;
     [SerializeField] Transform meshParent;
+    [SerializeField] MeshCollider meshCollider;
 
     [Header("Values")]
     [Range(10, 100)]
@@ -20,13 +21,11 @@ public class MeshGenerator : MonoBehaviour
 
     List<MeshVertices> meshes = new List<MeshVertices>();
     Mesh mesh;
-    List<int> triangleIndices = new List<int>();
-
 
     // Start is called before the first frame update
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
@@ -47,6 +46,9 @@ public class MeshGenerator : MonoBehaviour
 
     void GenerateMesh()
     {
+        mesh = new Mesh();
+        GetComponent<MeshFilter>().mesh = mesh;
+
         //Clear & delete old meshes
         if (meshes.Count > 0)
         {
@@ -60,7 +62,7 @@ public class MeshGenerator : MonoBehaviour
         int countPerLine = Mathf.CeilToInt(((float)count / bezierCurve.GetControlPointsCount()));
         Vector3[] points = bezierCurve.GetAllPointsOnCurve(countPerLine);
         Debug.Log("Bezier curve points: " + points.Length);
-        
+
         //Loop the points and instantiate meshes along it
         int interval = Mathf.RoundToInt(((float)points.Length / count));
         for (int i = 0; i < points.Length; i++)
@@ -72,12 +74,12 @@ public class MeshGenerator : MonoBehaviour
                 if (i == points.Length - 1) //From last to first
                 {
                     direction = points[0] - points[i];
-                }                 
+                }
                 else //From current to next
                 {
                     direction = points[i + 1] - points[i];
                 }
-                    
+
                 //Instantiate mesh
                 MeshVertices mesh = Instantiate(meshPrefab, points[i], Quaternion.LookRotation(direction));
                 mesh.transform.SetParent(meshParent);
@@ -96,7 +98,8 @@ public class MeshGenerator : MonoBehaviour
         List<int> triangles = new List<int>();
 
         //Loop all instantiated 2D meshes through
-        for (int i = 0; i < meshes.Count - 1; i++)
+        int faceIndex = 0;
+        for (int i = 0; i < meshes.Count; i++)
         {
             MeshVertices currentMesh = null;
             MeshVertices nextMesh = null;
@@ -112,49 +115,135 @@ public class MeshGenerator : MonoBehaviour
                 nextMesh = meshes[i + 1];
             }
 
-            // Loop all faces that will be between two 2D meshes
-            for (int x = 0; x < meshPrefab.vertices.Length - 1; x++)
+            //Loop all faces that will be between two 2D meshes
+            for (int x = 0; x < meshPrefab.vertices.Length; x++)
             {
-                Vector3 curVertex1 = currentMesh.vertices[x].position;
-                Vector3 curVertex2 = currentMesh.vertices[x + 1].position;
-                Vector3 nextVertex1 = nextMesh.vertices[x].position;
-                Vector3 nextVertex2 = nextMesh.vertices[x + 1].position;
+                int curIndex = 0;
+                int nextIndex = 0;
+
+                if (x == meshPrefab.vertices.Length - 1) //From last to first
+                {
+                    curIndex = x;
+                    nextIndex = 0;
+                }
+                else //From current to next
+                {
+                    curIndex = x;
+                    nextIndex = x + 1;
+                }
+
+                Vector3 curVertex1 = currentMesh.vertices[curIndex].position;
+                Vector3 curVertex2 = currentMesh.vertices[nextIndex].position;
+                Vector3 nextVertex1 = nextMesh.vertices[curIndex].position;
+                Vector3 nextVertex2 = nextMesh.vertices[nextIndex].position;
 
                 //Create vertices
                 Vector3[] verts = new Vector3[]
                 {
-       
-                    curVertex1,
-      
-                    curVertex2,
-       
-                    nextVertex1,
-       
-                    nextVertex2
+                curVertex1,
+                curVertex2,
+                nextVertex1,
+                nextVertex2
                 };
 
-                //Create triangles
-                int[] Newtriangles = new int[]
+                //Create vertices
+                int trisMult = faceIndex * 4; //This goes to next vertices on mesh as it goes along the path
+                int[] tris = new int[]
                 {
-       
-                    0, 1, 2,
-       
-                    1, 3, 2
+                0 + trisMult, 1 + trisMult, 2 + trisMult,
+                3 + trisMult, 2 + trisMult, 1 + trisMult
                 };
 
-                //Add indices to triangleIndices list
-                int startIndex = vertices.Count;
-                for (int j = 0; j < Newtriangles.Length; j++)
-                    triangleIndices.Add(startIndex + Newtriangles[j]);
-
-                //Add vertices to vertices list
                 vertices.AddRange(verts);
+                triangles.AddRange(tris);
+
+                faceIndex++;
             }
-
         }
-        mesh.vertices = vertices.ToArray();
-        mesh.triangles = triangleIndices.ToArray();
 
+        //Assign to mesh
+        mesh.vertices = vertices.ToArray();
+        mesh.triangles = triangles.ToArray();
+
+        //Assign UVs to mesh
+        Vector2[] uvs = new Vector2[vertices.Count];
+
+        Debug.Log("Mesh count: " + meshes.Count);
+        Debug.Log("Vertices count: " + vertices.Count);
+        Debug.Log("Faces count: " + vertices.Count / 4);
+
+        //Setup for loop with overall index and loop all vertices 
+        int index = 0;
+        for (int i = 0; i < meshes.Count; i++)
+        {
+            for (int j = 0; j < 4; j++)
+            {
+                if (i == meshes.Count - 1) //last to first
+                {
+                    //Get uv scale based on vertice direction and apply it to the uv cords
+                    Vector2 uvScale = GetUVScale(meshes[i].transform.position, meshes[0].transform.position);
+
+                    float xCord = uvScale.x * vertices[index].x;
+                    float zCord = uvScale.y * vertices[index].z;
+
+                    uvs[index] = new Vector2(xCord + zCord, vertices[index].y);
+                }
+                else
+                {
+                    //Get uv scale based on vertice direction and apply it to the uv cords
+                    Vector2 uvScale = GetUVScale(meshes[i].transform.position, meshes[i + 1].transform.position);
+
+                    float xCord = uvScale.x * vertices[index].x;
+                    float zCord = uvScale.y * vertices[index].z;
+
+                    uvs[index] = new Vector2(xCord + zCord, vertices[index].y);
+                }
+                index++;
+            }
+        }
+
+        //Apply uv and recalculate normals
+        mesh.uv = uvs;
+        mesh.RecalculateNormals();
+
+        //Flip the mesh normals
+        Vector3[] normals = mesh.normals;
+        for (int i = 0; i < mesh.normals.Length; i++)
+        {
+            normals[i] = -1 * normals[i];
+        }
+
+        mesh.normals = normals;
+
+        for (int i = 0; i < mesh.subMeshCount; i++)
+        {
+            int[] tris = mesh.GetTriangles(i);
+            for (int j = 0; j < tris.Length; j += 3)
+            {
+                int temp = tris[j];
+                tris[j] = tris[j + 1];
+                tris[j + 1] = temp;
+            }
+            mesh.SetTriangles(tris, i);
+        }
+
+        meshCollider.sharedMesh = mesh;
+    }
+
+
+
+    Vector2 GetUVScale(Vector3 from, Vector3 to)
+    {
+        //Direction
+        Vector3 dir = to - from;
+        dir.Normalize();
+
+        //Create the scale from the normalized direction
+        Vector2 uvScale;
+        uvScale.x = dir.x;
+        uvScale.y = dir.z;
+
+        return uvScale;
     }
 
     void OnDrawGizmos()
