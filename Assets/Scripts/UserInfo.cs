@@ -2,9 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Firebase.Database;
 
 public class UserInfo : MonoBehaviour
 {
+    public delegate void UserAuthStateChanged(bool isSingedIn);
+    public static event UserAuthStateChanged OnUserAuthStateChanged;
+
+    public RectTransform InGameUI;
+    public RectTransform SignInSignUpPanel;
     public RectTransform InfoPanel;
     public Text userEmailText;
     public Button ButtonSignOut;
@@ -30,6 +36,11 @@ public class UserInfo : MonoBehaviour
             {
                 Debug.Log("Signed out " + user.UserId);
                 InfoPanel.gameObject.SetActive(false);
+
+                InGameUI.gameObject.SetActive(false);
+                SignInSignUpPanel.gameObject.SetActive(true);
+
+                OnUserAuthStateChanged?.Invoke(false);
             }
             user = auth.CurrentUser;
             if (signedIn)
@@ -37,6 +48,11 @@ public class UserInfo : MonoBehaviour
                 Debug.Log("Signed in " + user.Email);
                 InfoPanel.gameObject.SetActive(true);
                 userEmailText.text = user.Email;
+
+                InGameUI.gameObject.SetActive(true);
+                SignInSignUpPanel.gameObject.SetActive(false);
+
+                OnUserAuthStateChanged?.Invoke(true);
             }
         }
     }
