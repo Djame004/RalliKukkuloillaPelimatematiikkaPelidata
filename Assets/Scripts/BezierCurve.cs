@@ -5,7 +5,7 @@ using UnityEngine;
 public class BezierCurve : MonoBehaviour
 {
     [SerializeField] BezierControlPoint[] points;
-    [Range(1, 100)]
+    [Range(1, 10000)]
     [SerializeField] int renderingCount = 10;
     [SerializeField] bool drawGizmos;
 

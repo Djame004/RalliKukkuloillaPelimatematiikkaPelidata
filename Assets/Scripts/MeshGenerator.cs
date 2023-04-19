@@ -15,7 +15,7 @@ public class MeshGenerator : MonoBehaviour
     [SerializeField] MeshCollider meshCollider;
 
     [Header("Values")]
-    [Range(10, 100)]
+    [Range(10, 10000)]
     [SerializeField] int count;
     [SerializeField] bool drawGizmos;
 

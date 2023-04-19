@@ -8,7 +8,7 @@ public class MoveAlongBezier : MonoBehaviour
     [SerializeField] float moveSpeed = 5f;
     [SerializeField] float turnSpeed = 10f;
     [SerializeField] float accelerationPerSecound = 5f;
-    [Range(10, 100)]
+    [Range(10, 10000)]
     [SerializeField] int pointsOnPath = 50;
 
     Vector3[] pathPoints;
