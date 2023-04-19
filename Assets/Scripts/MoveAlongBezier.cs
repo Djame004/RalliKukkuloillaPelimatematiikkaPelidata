@@ -5,9 +5,9 @@ using UnityEngine;
 public class MoveAlongBezier : MonoBehaviour
 {
     [SerializeField] BezierCurve bezierCurve;
-    [SerializeField] float moveSpeed = 5f;
-    [SerializeField] float turnSpeed = 10f;
-    [SerializeField] float accelerationPerSecound = 5f;
+    [SerializeField] float moveSpeed;
+    public float boostSpeed;
+    [SerializeField] float turnSpeed;
     [Range(10, 10000)]
     [SerializeField] int pointsOnPath = 50;
 
@@ -21,6 +21,9 @@ public class MoveAlongBezier : MonoBehaviour
         pathPoints = bezierCurve.GetAllPointsOnCurve(pointsPerLine);
 
         transform.position = pathPoints[0];
+        InvokeRepeating("increaseSpeed", 0f, 0.5f);
+
+
     }
 
     // Update is called once per frame
@@ -39,14 +42,22 @@ public class MoveAlongBezier : MonoBehaviour
         {
             currentIndex++;
         }
-
-        if(Input.GetMouseButtonDown(0))
+        if (moveSpeed >= 20f)
         {
-            
+            CancelInvoke("increaseSpeed");
+        }
+        if (Input.GetMouseButtonDown(0))
+        {
+            moveSpeed += boostSpeed;
+        }
+        if (Input.GetMouseButtonDown(1))
+        {
+            moveSpeed -= boostSpeed;
         }
     }
-    IEnumerator SpeedDuration()
+
+    void increaseSpeed()
     {
-        yield return new WaitForSeconds(accelerationPerSecound);
+        moveSpeed = moveSpeed + 1f;
     }
 }
