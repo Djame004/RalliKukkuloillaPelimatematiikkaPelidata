@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using System; //<-- AGGREGATE EXCEPTION
 using System.Threading.Tasks; //<-- TASK
+using UnityEditor.SceneManagement;
+using UnityEngine.SceneManagement;
 
 public class UISignInUp : MonoBehaviour
 {
@@ -78,6 +80,7 @@ public class UISignInUp : MonoBehaviour
             //which may be fine and with continue on this thread:
             Firebase.Auth.FirebaseUser user = task.Result;
             Debug.Log("USER CREATED: " + user.UserId);
+            OnSuccesfullSignIn();
         }
         catch (AggregateException ae)
         {
@@ -86,6 +89,11 @@ public class UISignInUp : MonoBehaviour
             foreach (var ex in ae.InnerExceptions)
                 Debug.LogErrorFormat("{0}: {1}", ex.GetType().Name, ex.Message);
         }
+    }
+
+    void OnSuccesfullSignIn()
+    {
+        SceneManager.LoadScene(2);
     }
 
     private async void SignInUserEmailPassword(string email, string password)
@@ -99,6 +107,7 @@ public class UISignInUp : MonoBehaviour
         {
             Firebase.Auth.FirebaseUser user = task.Result;
             Debug.Log("USER SIGNED IN: " + user.UserId);
+            OnSuccesfullSignIn();
         }
         catch(AggregateException ae)
         {

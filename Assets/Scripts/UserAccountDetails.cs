@@ -9,22 +9,33 @@ public class UserAccountDetails : MonoBehaviour
 {
     private DatabaseReference dbReference;
     private Firebase.Auth.FirebaseAuth auth;
+    public LapCounter lapCounter;
 
+    GameObject userAccountDetails;
     private void Awake()
     {
+        DontDestroyOnLoad(gameObject);
+
+        if (userAccountDetails == null)
+        {
+            userAccountDetails = gameObject;
+        }
+        else Destroy(gameObject);
+
         dbReference = FirebaseDatabase.DefaultInstance.RootReference;
         auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
-
+        
         UserInfo.OnUserAuthStateChanged += UserInfo_OnUserAuthStateChanged;
     }
 
     private void UserInfo_OnUserAuthStateChanged(bool isSignedIn)
     {
+        Debug.Log(auth.CurrentUser.Email);
         if (isSignedIn)
-            ReadWriteUserDetails("Pasi", 1234.5f, false, false);
+            ReadWriteUserDetails(auth.CurrentUser.Email, lapCounter.Getlapcount(), false, false);
     }
 
-    private async void ReadWriteUserDetails(string username, float playtime, bool updateUsername, bool updateTotalPlaytime)
+    private async void ReadWriteUserDetails(string username, int lapCount, bool updateUsername, bool updateTotalPlaytime)
     {
         UserDetails userDetails = null;
 
@@ -48,7 +59,7 @@ public class UserAccountDetails : MonoBehaviour
                     }
                     if (updateTotalPlaytime)
                     {
-                        await dbReference.Child("users").Child(auth.CurrentUser.UserId).Child("TotalPlayTime").SetPriorityAsync(playtime);
+                        await dbReference.Child("users").Child(auth.CurrentUser.UserId).Child("BestLapCount").SetPriorityAsync(lapCount);
                     }
                 }
                 else
@@ -62,7 +73,7 @@ public class UserAccountDetails : MonoBehaviour
 
             else
             {
-                userDetails = new UserDetails(username, playtime, updateUsername, updateTotalPlaytime);
+                userDetails = new UserDetails(username, FindObjectOfType<LapCounter>().Getlapcount(), updateUsername, updateTotalPlaytime);
                 string json = JsonUtility.ToJson(userDetails);
                 string userId = auth.CurrentUser.UserId;
 
@@ -81,7 +92,7 @@ public class UserAccountDetails : MonoBehaviour
 
         if(userDetails != null)
         {
-            Debug.Log(userDetails.UserName + " | playtime : " + userDetails.TotalPlayTime);
+            Debug.Log(userDetails.UserName + " | LapCounter : " + userDetails.TotalPlayTime);
         }
 
         //DataSnapshot dataSnapshot = task.Result;
@@ -92,6 +103,11 @@ public class UserAccountDetails : MonoBehaviour
         //string userId = auth.CurrentUser.UserId;
 
         //dbReference.Child("users").Child(userId).SetRawJsonValueAsync(json);
+    }
+
+    public void UpdateLapCount(int lapCount)
+    {
+        ReadWriteUserDetails(auth.CurrentUser.Email, FindObjectOfType<LapCounter>().Getlapcount(), false, false);
     }
 
     public class UserDetails
