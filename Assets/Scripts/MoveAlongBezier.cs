@@ -7,6 +7,7 @@ public class MoveAlongBezier : MonoBehaviour
     [SerializeField] BezierCurve bezierCurve;
     [SerializeField] float moveSpeed = 5f;
     [SerializeField] float turnSpeed = 10f;
+    [SerializeField] float accelerationPerSecound = 5f;
     [Range(10, 100)]
     [SerializeField] int pointsOnPath = 50;
 
@@ -14,7 +15,6 @@ public class MoveAlongBezier : MonoBehaviour
 
     int currentIndex;
 
-    // Start is called before the first frame update
     void Start()
     {
         int pointsPerLine = Mathf.CeilToInt(((float)pointsOnPath / bezierCurve.GetControlPointsCount()));
@@ -39,5 +39,14 @@ public class MoveAlongBezier : MonoBehaviour
         {
             currentIndex++;
         }
+
+        if(Input.GetMouseButtonDown(0))
+        {
+            
+        }
+    }
+    IEnumerator SpeedDuration()
+    {
+        yield return new WaitForSeconds(accelerationPerSecound);
     }
 }
