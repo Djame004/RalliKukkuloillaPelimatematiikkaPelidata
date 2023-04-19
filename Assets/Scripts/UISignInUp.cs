@@ -39,7 +39,25 @@ public class UISignInUp : MonoBehaviour
 
         //Handle sign in button click
         ButtonSignIn.onClick.AddListener(() => SignInUserEmailPassword(InputFieldSignInUsername.text, InputFieldSignInPassword.text));
+
+        //Handle enter key press for sign in
+        InputFieldSignInUsername.onEndEdit.AddListener((value) =>
+        {
+            if (Input.GetKeyDown(KeyCode.Return))
+            {
+                SignInUserEmailPassword(InputFieldSignInUsername.text, InputFieldSignInPassword.text);
+            }
+        });
+
+        InputFieldSignInPassword.onEndEdit.AddListener((value) =>
+        {
+            if (Input.GetKeyDown(KeyCode.Return))
+            {
+                SignInUserEmailPassword(InputFieldSignInUsername.text, InputFieldSignInPassword.text);
+            }
+        });
     }
+
 
     private void ToggleSignUpInView()
     {
