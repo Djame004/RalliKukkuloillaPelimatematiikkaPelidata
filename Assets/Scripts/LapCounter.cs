@@ -15,10 +15,14 @@ public class LapCounter : MonoBehaviour
     bool lapCounter = false;
     public UserAccountDetails userAccountDetails;
     public GameObject[] particleEffects;
+    public float CurrentLapTime = 0;
+    public float BestLaptime = 9999;
+  
 
     private void Start()
     {
         userAccountDetails = FindObjectOfType<UserAccountDetails>();
+        userAccountDetails.UpdateLapCountAndTime();
     }
 
     void Update()
@@ -33,28 +37,42 @@ public class LapCounter : MonoBehaviour
         if (distFinish > colliderCheck && lapCounter)
         {
             currentLapCount++;
-            userAccountDetails.UpdateLapCount(currentLapCount);
             lapCounter = false;
-
             if (currentLapCount > lapCount)
             {
                 lapCount = currentLapCount;
-
+                userAccountDetails.UpdateLapCountAndTime();
                 foreach (GameObject particleEffect in particleEffects)
                 {
                     StartCoroutine(ParticleSpawner(particleEffect));
                 }
             }
+            BestLaptime = userAccountDetails.dbBestTime;
+            if (CurrentLapTime < BestLaptime)
+            {
+                BestLaptime = CurrentLapTime;
+                userAccountDetails.UpdateLapCountAndTime();
+            }
+            CurrentLapTime = 0;
         }
 
-        Debug.Log("Lap " + currentLapCount + " completed.");
+        CurrentLapTime += Time.deltaTime;
+        
+
+        //Debug.Log("Lap " + currentLapCount + " completed. Lap time: " + CurrentLapTime);
+
+
+       
     }
 
     public int Getlapcount()
     {
         return lapCount;
     }
-
+    public float GetlapTime()
+    {
+        return BestLaptime;
+    }
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.green;

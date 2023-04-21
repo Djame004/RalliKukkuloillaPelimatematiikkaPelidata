@@ -4,12 +4,15 @@ using UnityEngine;
 using Firebase.Database;
 using System;
 using System.Threading.Tasks;
+using System.Linq;
 
 public class UserAccountDetails : MonoBehaviour
 {
     private DatabaseReference dbReference;
     private Firebase.Auth.FirebaseAuth auth;
-    public LapCounter lapCounter;
+    public LapCounter lapTimer;
+    public float dbBestTime;
+    public List<LeaderBoardEntry> leaderBoardList = new List<LeaderBoardEntry>();
 
     GameObject userAccountDetails;
     private void Awake()
@@ -24,7 +27,7 @@ public class UserAccountDetails : MonoBehaviour
 
         dbReference = FirebaseDatabase.DefaultInstance.RootReference;
         auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
-        
+
         UserInfo.OnUserAuthStateChanged += UserInfo_OnUserAuthStateChanged;
     }
 
@@ -32,10 +35,10 @@ public class UserAccountDetails : MonoBehaviour
     {
         Debug.Log(auth.CurrentUser.Email);
         if (isSignedIn)
-            ReadWriteUserDetails(auth.CurrentUser.Email, lapCounter.Getlapcount(), false, false);
+            ReadWriteUserDetails(auth.CurrentUser.Email, 0, lapTimer.GetlapTime());
     }
 
-    private async void ReadWriteUserDetails(string username, int lapCount, bool updateUsername, bool updateTotalPlaytime)
+    private async void ReadWriteUserDetails(string username, float LapCount, float lapTime)
     {
         UserDetails userDetails = null;
 
@@ -48,83 +51,113 @@ public class UserAccountDetails : MonoBehaviour
         try
         {
             DataSnapshot dataSnapshot = task.Result;
-
-            if (dataSnapshot.Exists)
+            if (!dataSnapshot.Exists)
             {
-                if (updateTotalPlaytime || updateUsername)
-                {
-                    if (updateUsername)
-                    {
-                        await dbReference.Child("users").Child(auth.CurrentUser.UserId).Child("UserName").SetPriorityAsync(username);
-                    }
-                    if (updateTotalPlaytime)
-                    {
-                        await dbReference.Child("users").Child(auth.CurrentUser.UserId).Child("BestLapCount").SetPriorityAsync(lapCount);
-                    }
-                }
-                else
-                {
-                    userDetails = JsonUtility.FromJson<UserDetails>(dataSnapshot.GetRawJsonValue());
-                    Debug.Log("Existing user: " + userDetails.UserName);
-                }
-
-
-            }
-
-            else
-            {
-                userDetails = new UserDetails(username, FindObjectOfType<LapCounter>().Getlapcount(), updateUsername, updateTotalPlaytime);
+                userDetails = new UserDetails(username, 0, 9999);
                 string json = JsonUtility.ToJson(userDetails);
                 string userId = auth.CurrentUser.UserId;
 
                 await dbReference.Child("users").Child(userId).SetRawJsonValueAsync(json);
                 Debug.Log("New user added: " + username);
+                dbBestTime = float.Parse(dataSnapshot.Child("BestLapTime").GetRawJsonValue().ToString());
+            }
+
+            else
+            {
+                userDetails = new UserDetails(username, LapCount, lapTime);
+                string json = JsonUtility.ToJson(userDetails);
+                string userId = auth.CurrentUser.UserId;
+
+                await dbReference.Child("users").Child(userId).SetRawJsonValueAsync(json);
+                Debug.Log("New user added: " + username);
+                dbBestTime = float.Parse(dataSnapshot.Child("BestLapTime").GetRawJsonValue().ToString());
             }
         }
-
-        catch(AggregateException ae)
+        catch (AggregateException ae)
         {
-            foreach(var e in ae.InnerExceptions)
+            foreach (var e in ae.InnerExceptions)
             {
                 Debug.LogError(e.Message);
             }
         }
 
-        if(userDetails != null)
+        if (userDetails != null)
         {
-            Debug.Log(userDetails.UserName + " | LapCounter : " + userDetails.TotalPlayTime);
+            Debug.Log(userDetails.UserName + " | BestLapTime : " + userDetails.BestLapTime);
         }
-
-        //DataSnapshot dataSnapshot = task.Result;
-        //Debug.Log("dataa" + dataSnapshot.GetRawJsonValue());
-
-        //UserDetails userDetails = new UserDetails(username, playtime);
-        //string json = JsonUtility.ToJson(userDetails);
-        //string userId = auth.CurrentUser.UserId;
-
-        //dbReference.Child("users").Child(userId).SetRawJsonValueAsync(json);
+        GetLeaderBoards();
     }
 
-    public void UpdateLapCount(int lapCount)
+    public void UpdateLapCountAndTime()
     {
-        ReadWriteUserDetails(auth.CurrentUser.Email, FindObjectOfType<LapCounter>().Getlapcount(), false, false);
+        lapTimer = FindObjectOfType<LapCounter>();
+        Debug.Log(lapTimer);
+        ReadWriteUserDetails(auth.CurrentUser.Email, lapTimer.Getlapcount(), lapTimer.GetlapTime());
     }
 
     public class UserDetails
     {
         public string UserName;
-        public float TotalPlayTime;
-        public bool UpdateTotalPlaytime;
-        public bool UpdateUsername;
+        public float LapCount;
+        public float BestLapTime;
 
-        public UserDetails(string username, float totalPlayTime, bool updateUsername, bool updateTotalPlaytime)
+        public UserDetails(string username, float lapCount, float bestLapTime)
         {
             UserName = username;
-            TotalPlayTime = totalPlayTime;
-            UpdateTotalPlaytime = updateTotalPlaytime;
-            UpdateUsername = updateUsername;
+            LapCount = lapCount;
+            BestLapTime = bestLapTime;
         }
-            
-        
+    }
+
+    private async void GetLeaderBoards()
+    {
+
+        Task<DataSnapshot> task = FirebaseDatabase.DefaultInstance
+            .GetReference("users/")
+            .GetValueAsync();
+
+        await task;
+
+        try
+        {
+            DataSnapshot dataSnapshot = task.Result;
+            if (dataSnapshot.Exists)
+            {
+                //Luodaan uusi lista mihin tungetaan databasesta (users alta kaikki childit).
+                List<LeaderBoardEntry> dataBaseList = new List<LeaderBoardEntry>();
+
+                foreach (DataSnapshot child in dataSnapshot.Children)
+                {
+                    LeaderBoardEntry entry = new LeaderBoardEntry(
+                        dataSnapshot.Child("UserName").GetRawJsonValue().ToString(),
+                        float.Parse(dataSnapshot.Child("BestLapTime").GetRawJsonValue().ToString()));
+
+                    dataBaseList.Add(entry);
+
+                }
+                //tyhjennetään lista vanhasta datasta.
+                leaderBoardList.Clear();
+                //asetetaan objektit listaan (10kpl) Time muutujan mukaan suurimmasta pienimpään.
+                leaderBoardList = dataBaseList.OrderBy(o => o.Time).Take(10).ToList();
+
+            }
+        }
+        catch (AggregateException ae)
+        {
+            foreach (var e in ae.InnerExceptions)
+            {
+                Debug.LogError(e.Message);
+            }
+        }
+    }
+    public class LeaderBoardEntry
+    {
+        public string Name;
+        public float Time;
+        public LeaderBoardEntry(string name, float time)
+        {
+            Name = name;
+            Time = time;
+        }
     }
 }

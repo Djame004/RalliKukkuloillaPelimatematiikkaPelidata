@@ -29,6 +29,7 @@ public class UISignInUp : MonoBehaviour
     public bool SignInActive { get; private set; } = true;
     public void Awake()
     {
+
         //Set reference to FirebaseAuth instance
         auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
 
