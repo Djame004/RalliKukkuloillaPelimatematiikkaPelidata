@@ -21,7 +21,6 @@ public class MeshGenerator : MonoBehaviour
 
     List<MeshVertices> meshes = new List<MeshVertices>();
     Mesh mesh;
-
     // Start is called before the first frame update
     void Start()
     {
@@ -206,6 +205,7 @@ public class MeshGenerator : MonoBehaviour
         mesh.uv = uvs;
         mesh.RecalculateNormals();
 
+
         //Flip the mesh normals
         Vector3[] normals = mesh.normals;
         for (int i = 0; i < mesh.normals.Length; i++)
@@ -228,7 +228,13 @@ public class MeshGenerator : MonoBehaviour
         }
 
         meshCollider.sharedMesh = mesh;
+
+        
+
+
     }
+
+
 
 
 
@@ -244,7 +250,10 @@ public class MeshGenerator : MonoBehaviour
         uvScale.y = dir.z;
 
         return uvScale;
+
     }
+
+
 
     void OnDrawGizmos()
     {

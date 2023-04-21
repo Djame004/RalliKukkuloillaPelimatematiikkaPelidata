@@ -54,6 +54,7 @@ public class MoveAlongBezier : MonoBehaviour
         {
             moveSpeed -= boostSpeed;
         }
+        
     }
 
     void increaseSpeed()

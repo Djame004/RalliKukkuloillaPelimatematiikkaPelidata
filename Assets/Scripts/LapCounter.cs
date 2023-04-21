@@ -7,13 +7,14 @@ using static UnityEditor.Experimental.GraphView.GraphView;
 public class LapCounter : MonoBehaviour
 {
     public GameObject car;
-    [Range(0.1f,5f)]
+    [Range(0.1f, 5f)]
     public float colliderCheck = 4.1f;
     public float distFinish;
     public int lapCount = 0;
     private int currentLapCount = 0;
     bool lapCounter = false;
     public UserAccountDetails userAccountDetails;
+    public GameObject[] particleEffects;
 
     private void Start()
     {
@@ -21,7 +22,7 @@ public class LapCounter : MonoBehaviour
     }
 
     void Update()
-    {   
+    {
         distFinish = Vector3.Distance(transform.position, car.transform.position);
 
         if (distFinish < colliderCheck)
@@ -34,12 +35,18 @@ public class LapCounter : MonoBehaviour
             currentLapCount++;
             userAccountDetails.UpdateLapCount(currentLapCount);
             lapCounter = false;
+
+            if (currentLapCount > lapCount)
+            {
+                lapCount = currentLapCount;
+
+                foreach (GameObject particleEffect in particleEffects)
+                {
+                    StartCoroutine(ParticleSpawner(particleEffect));
+                }
+            }
         }
 
-        if (currentLapCount > lapCount)
-        {
-            lapCount = currentLapCount;
-        }
         Debug.Log("Lap " + currentLapCount + " completed.");
     }
 
@@ -52,5 +59,12 @@ public class LapCounter : MonoBehaviour
     {
         Gizmos.color = Color.green;
         Gizmos.DrawWireSphere(transform.position, colliderCheck);
+    }
+    IEnumerator ParticleSpawner(GameObject particleEffect)
+    {
+        particleEffect.SetActive(true);
+        yield return new WaitForSeconds(5);
+        particleEffect.SetActive(false);
+
     }
 }

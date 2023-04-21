@@ -93,7 +93,7 @@ public class UISignInUp : MonoBehaviour
 
     void OnSuccesfullSignIn()
     {
-        SceneManager.LoadScene(2);
+        SceneManager.LoadScene(1);
     }
 
     private async void SignInUserEmailPassword(string email, string password)

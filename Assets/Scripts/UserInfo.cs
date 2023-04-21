@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Firebase.Database;
+using UnityEngine.SceneManagement;
 
 public class UserInfo : MonoBehaviour
 {
@@ -20,6 +21,7 @@ public class UserInfo : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
+        auth.SignOut();
         auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
         auth.StateChanged += AuthStateChanged;
 
@@ -53,7 +55,18 @@ public class UserInfo : MonoBehaviour
                 SignInSignUpPanel.gameObject.SetActive(false);
 
                 OnUserAuthStateChanged?.Invoke(true);
+                // Load Scene 1 if the user has signed in
+                SceneManager.LoadScene(1);
+
+
+
+
+
             }
+
+            
         }
+
     }
+    
 }

@@ -9,9 +9,12 @@ EditorBuildSettings:
     path: Assets/Scenes/FireBase.unity
     guid: 9ea7835a94dfd6945a741df473aa84b8
   - enabled: 1
-    path: Assets/Scenes/ProcedualScene.unity
-    guid: 7e0f3bd95f8d3de419af9aa239140c3e
-  - enabled: 1
+    path: Assets/Scenes/PeliScene.unity
+    guid: 65fd18b9c8abfde47b3deff95f2890d3
+  - enabled: 0
+    path: 
+    guid: 00000000000000000000000000000000
+  - enabled: 0
     path: Assets/Scenes/KierrosTesti.unity
     guid: c15b248e56f5eb644902831f3199b046
   m_configObjects: {}
