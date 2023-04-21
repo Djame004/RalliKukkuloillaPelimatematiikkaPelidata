@@ -26,7 +26,7 @@ public class MoveAlongManager : MonoBehaviour
         float currentX = MoveAlongXAxis.GetCurrentXPosition();
         float absoluteX = Mathf.Abs(randomX - currentX);
         
-        Debug.Log("Absolute X: " + absoluteX);
+        //Debug.Log("Absolute X: " + absoluteX);
 
         if(Input.GetKeyDown(KeyCode.Space)) 
         {

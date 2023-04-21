@@ -28,16 +28,17 @@ public class LapCounter : MonoBehaviour
     void Update()
     {
         distFinish = Vector3.Distance(transform.position, car.transform.position);
-
+        //Aseta lapCounter: true kun auto on colliderin sisällä
         if (distFinish < colliderCheck)
         {
             lapCounter = true;
         }
-
+        //kun auto poistuu colliderista se lisää lapCounteriin yhden kierroksen
         if (distFinish > colliderCheck && lapCounter)
         {
             currentLapCount++;
             lapCounter = false;
+            
             if (currentLapCount > lapCount)
             {
                 lapCount = currentLapCount;
