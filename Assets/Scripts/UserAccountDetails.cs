@@ -53,13 +53,13 @@ public class UserAccountDetails : MonoBehaviour
             DataSnapshot dataSnapshot = task.Result;
             if (!dataSnapshot.Exists)
             {
-                userDetails = new UserDetails(username, 0, 9999);
+                userDetails = new UserDetails(username, 0, 9999999);
                 string json = JsonUtility.ToJson(userDetails);
                 string userId = auth.CurrentUser.UserId;
 
                 await dbReference.Child("users").Child(userId).SetRawJsonValueAsync(json);
                 Debug.Log("New user added: " + username);
-                dbBestTime = float.Parse(dataSnapshot.Child("BestLapTime").GetRawJsonValue().ToString());
+                dbBestTime = 9999999;
             }
 
             else
@@ -69,8 +69,9 @@ public class UserAccountDetails : MonoBehaviour
                 string userId = auth.CurrentUser.UserId;
 
                 await dbReference.Child("users").Child(userId).SetRawJsonValueAsync(json);
-                Debug.Log("New user added: " + username);
-                dbBestTime = float.Parse(dataSnapshot.Child("BestLapTime").GetRawJsonValue().ToString());
+                
+                dbBestTime = float.Parse(dataSnapshot.Child("BestLapTime").GetRawJsonValue().ToString().Substring(0, 4).Replace('.', ','));
+
             }
         }
         catch (AggregateException ae)
@@ -128,9 +129,11 @@ public class UserAccountDetails : MonoBehaviour
 
                 foreach (DataSnapshot child in dataSnapshot.Children)
                 {
-                    LeaderBoardEntry entry = new LeaderBoardEntry(
-                        dataSnapshot.Child("UserName").GetRawJsonValue().ToString(),
-                        float.Parse(dataSnapshot.Child("BestLapTime").GetRawJsonValue().ToString()));
+                    string name = child.Child("UserName").GetRawJsonValue().ToString();
+                    string tempscore = child.Child("BestLapTime").GetRawJsonValue().ToString().Substring(0, 4);
+                    float score = float.Parse(tempscore.Replace('.', ','));
+
+                    LeaderBoardEntry entry = new LeaderBoardEntry(name, score);
 
                     dataBaseList.Add(entry);
 

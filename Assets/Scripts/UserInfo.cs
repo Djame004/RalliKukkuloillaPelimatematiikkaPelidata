@@ -23,6 +23,7 @@ public class UserInfo : MonoBehaviour
     {
         auth.SignOut();
         auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
+        auth.SignOut();
         auth.StateChanged += AuthStateChanged;
 
         ButtonSignOut.onClick.AddListener(()=> auth.SignOut());

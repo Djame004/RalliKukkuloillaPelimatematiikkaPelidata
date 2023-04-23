@@ -15,8 +15,10 @@ public class LapCounter : MonoBehaviour
     bool lapCounter = false;
     public UserAccountDetails userAccountDetails;
     public GameObject[] particleEffects;
-    public float CurrentLapTime = 0;
-    public float BestLaptime = 9999;
+    public float CurrentLapTime = 9999999;
+    public float BestLaptime = 9999999;
+
+
   
 
     private void Start()
@@ -38,7 +40,7 @@ public class LapCounter : MonoBehaviour
         {
             currentLapCount++;
             lapCounter = false;
-            
+
             if (currentLapCount > lapCount)
             {
                 lapCount = currentLapCount;
@@ -52,18 +54,19 @@ public class LapCounter : MonoBehaviour
             if (CurrentLapTime < BestLaptime)
             {
                 BestLaptime = CurrentLapTime;
+
                 userAccountDetails.UpdateLapCountAndTime();
+                Debug.LogWarning("Aika: Account data Personal Space: " + userAccountDetails.dbBestTime);
+
+                Debug.LogWarning("Aika: Personal Best: " + BestLaptime);
             }
             CurrentLapTime = 0;
         }
 
+        // Update lap time continuously
         CurrentLapTime += Time.deltaTime;
-        
 
         //Debug.Log("Lap " + currentLapCount + " completed. Lap time: " + CurrentLapTime);
-
-
-       
     }
 
     public int Getlapcount()
