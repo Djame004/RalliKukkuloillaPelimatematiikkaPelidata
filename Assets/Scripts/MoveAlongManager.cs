@@ -6,9 +6,11 @@ public class MoveAlongManager : MonoBehaviour
 {
     private RandomXPosition RandomXPosition;
     private MoveAlongXAxis MoveAlongXAxis;
-    public float moveSpeed;
-    public float accelerationSpeed;
-    
+    public float moveSpeed = 0f;
+    private float targetSpeed = 0f;
+    private float accelerationSpeed = 0f;
+    private bool isAccelerating = false;
+    [SerializeField] GameObject ActionUI;
 
     // Start is called before the first frame update
     void Start()
@@ -20,59 +22,60 @@ public class MoveAlongManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        accelerationSpeed = Time.deltaTime * moveSpeed;
+        if (isAccelerating)
+        {
+            moveSpeed += accelerationSpeed;
+            if (moveSpeed >= targetSpeed)
+            {
+                moveSpeed = targetSpeed;
+                isAccelerating = false;
+            }
+        }
 
         float randomX = RandomXPosition.GetRandomX();
         float currentX = MoveAlongXAxis.GetCurrentXPosition();
         float absoluteX = Mathf.Abs(randomX - currentX);
-        
-        //Debug.Log("Absolute X: " + absoluteX);
 
-        if(Input.GetKeyDown(KeyCode.Space)) 
+        if (Input.GetKeyDown(KeyCode.Space))
         {
             if ((absoluteX) > 90)
             {
                 Debug.Log("Slider: You missed the area");
-                moveSpeed = 0f;
-
+                targetSpeed = 0f;
+                accelerationSpeed = Mathf.Abs(moveSpeed) / 1f;
+                isAccelerating = true;
+                GameOverManager gameOverManager = FindObjectOfType<GameOverManager>();
+                
+                    gameOverManager.isGameOver = true;
+                
             }
             else
             {
-                if (absoluteX < 90 && absoluteX >= 60) 
+                if (absoluteX < 90 && absoluteX >= 60)
                 {
-                    moveSpeed = moveSpeed * 0.5f;
+                    targetSpeed = 25f;
+                    accelerationSpeed = Mathf.Abs(moveSpeed - targetSpeed) / 1f;
+                    isAccelerating = true;
                     Debug.Log("Slider: You hit Orange!");
                 }
-                if (absoluteX < 60 && absoluteX >= 30) 
+                if (absoluteX < 60 && absoluteX >= 30)
                 {
-                    
+                    targetSpeed = 50f;
+                    accelerationSpeed = Mathf.Abs(moveSpeed - targetSpeed) / 1f;
+                    isAccelerating = true;
                     Debug.Log("Slider: You hit Yellow!");
                 }
-                if(absoluteX < 30)
+                if (absoluteX < 30)
                 {
-                    moveSpeed = moveSpeed * 2f;
+                    targetSpeed = 100f;
+                    accelerationSpeed = Mathf.Abs(moveSpeed - targetSpeed) / 1f;
+                    isAccelerating = true;
                     Debug.Log("Slider: You hit Green!");
                 }
+
+                
             }
+            ActionUI.SetActive(false);
         }
-        
-    
-        
     }
-
-    /* Acceleration of car!!
-     *  double initialSpeed = 0.0; // initial speed of the car
-        double accelerationRate = 10.0; // acceleration rate of the car (m/s^2)
-        double deaccelerationRate = -10.0; // deacceleration rate of the car (m/s^2)
-        double timeDuration = 1.0; // time duration of each acceleration or deacceleration (s)
-
-        double speedAfterFirstAcceleration = 2 * accelerationRate * timeDuration; // speed of the car after the first acceleration
-        double speedAfterSecondAcceleration = 2 * speedAfterFirstAcceleration; // speed of the car after the second acceleration
-        double speedAfterDeacceleration = speedAfterSecondAcceleration + deaccelerationRate * timeDuration; // speed of the car after the deacceleration to the normal speed
-
-        double finalSpeed = initialSpeed + speedAfterDeacceleration; // final speed of the car
-
-        Console.WriteLine("Final speed of the car is: " + finalSpeed + " m/s");
-    }
-     */
 }

@@ -5,8 +5,6 @@ using UnityEngine;
 public class MoveAlongBezier : MonoBehaviour
 {
     [SerializeField] BezierCurve bezierCurve;
-    [SerializeField] float moveSpeed;
-    public float boostSpeed;
     [SerializeField] float turnSpeed;
     [Range(10, 10000)]
     [SerializeField] int pointsOnPath = 50;
@@ -15,15 +13,16 @@ public class MoveAlongBezier : MonoBehaviour
 
     int currentIndex;
 
+    MoveAlongManager moveManager; // reference to the MoveAlongManager script
+
     void Start()
     {
         int pointsPerLine = Mathf.CeilToInt(((float)pointsOnPath / bezierCurve.GetControlPointsCount()));
         pathPoints = bezierCurve.GetAllPointsOnCurve(pointsPerLine);
 
         transform.position = pathPoints[0];
-        InvokeRepeating("increaseSpeed", 0f, 0.5f);
 
-
+        moveManager = FindObjectOfType<MoveAlongManager>(); // find the MoveAlongManager script in the scene
     }
 
     // Update is called once per frame
@@ -36,29 +35,13 @@ public class MoveAlongBezier : MonoBehaviour
         {
             Vector3 direction = pathPoints[currentIndex] - transform.position;
             transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(direction), turnSpeed * Time.deltaTime);
-            transform.position = Vector3.MoveTowards(transform.position, pathPoints[currentIndex], moveSpeed * Time.deltaTime);
+            transform.position = Vector3.MoveTowards(transform.position, pathPoints[currentIndex], moveManager.moveSpeed * Time.deltaTime); // use the moveSpeed variable from the MoveAlongManager script
         }
         else
         {
             currentIndex++;
         }
-        if (moveSpeed >= 20f)
-        {
-            CancelInvoke("increaseSpeed");
-        }
-        if (Input.GetMouseButtonDown(0))
-        {
-            moveSpeed += boostSpeed;
-        }
-        if (Input.GetMouseButtonDown(1))
-        {
-            moveSpeed -= boostSpeed;
-        }
-        
-    }
 
-    void increaseSpeed()
-    {
-        moveSpeed = moveSpeed + 1f;
+        
     }
 }

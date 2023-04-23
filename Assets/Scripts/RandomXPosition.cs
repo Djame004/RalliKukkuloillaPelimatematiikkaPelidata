@@ -4,15 +4,39 @@ public class RandomXPosition : MonoBehaviour
 {
     public RectTransform rectTransform;
     public float randomX;
+    public PlaneTrigger planeTrigger;
+    public PlaneTrigger planeTrigger2;
+    private bool hasRandomPosition = false;
+
+    void Start()
+    {
+    }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.K))
+        if (planeTrigger.isInside && !hasRandomPosition)
         {
-            randomX = Random.Range(rectTransform.rect.min.x, rectTransform.rect.max.x);
-            transform.localPosition = new Vector3(randomX, transform.localPosition.y, transform.localPosition.z);
+            CalculateRandomXPosition();
             Debug.Log("Random X position: " + randomX);
+            hasRandomPosition = true;
         }
+        if (planeTrigger2.isInside && !hasRandomPosition)
+        {
+            CalculateRandomXPosition();
+            Debug.Log("Random X position: " + randomX);
+            hasRandomPosition = true;
+        }
+
+        if (!planeTrigger.isInside && !planeTrigger2.isInside)
+        {
+            hasRandomPosition = false;
+        }
+    }
+
+    public void CalculateRandomXPosition()
+    {
+        randomX = Random.Range(rectTransform.rect.min.x, rectTransform.rect.max.x);
+        transform.localPosition = new Vector3(randomX, transform.localPosition.y, transform.localPosition.z);
     }
 
     public float GetRandomX()
@@ -20,4 +44,3 @@ public class RandomXPosition : MonoBehaviour
         return randomX;
     }
 }
-
