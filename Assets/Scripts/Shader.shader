@@ -10,7 +10,7 @@ Shader "Unlit/NewUnlitShader"
         _MaxHeight("Max Height", Range(0.0, 1000.0)) = 100.0
         _SnowHeight("Snow Height", Range(0.0, 1000.0)) = 100.0
         _MountainHeight("Mountain Height", Range(0.0, 1000.0)) = 100.0
-        _WaterHeight("Water Height", Range(0.0, 1000.0)) = 10.0
+        _WaterHeight("Water Height", Range(-50.0, 1000.0)) = 10.0
         _BlendDistance("Blend Distance", Range(0.0, 100.0)) = 20.0
 
     }
@@ -134,27 +134,27 @@ Shader "Unlit/NewUnlitShader"
                          t = 1 - (1 - t) * (1 - t);
                          col = (1 - t) * col_water + t * col_low;
                      }
-                    else {
-                        //col = col_water;
-                        //col = tex2D(_WaterTex, i.uv);
-                        // Water effect???
-                        //fixed4 col_rand1 = tex2D(_WaterTex, float2(sin(i.uv.x+_Time.y/150.f),
-                        //                                          sin(i.uv.y+_Time.y/100.0f)));
-                        //fixed4 col_rand2 = tex2D(_WaterTex, float2(sin(i.uv.x+_Time.y/100.f),
-                        //                                          sin(i.uv.y+_Time.y/150.0f)));
-                        //col = col_rand1 + col_rand2;
-                        //col = normalize(col);
+                    //else {
+                    //    //col = col_water;
+                    //    //col = tex2D(_WaterTex, i.uv);
+                    //    // Water effect???
+                    //    //fixed4 col_rand1 = tex2D(_WaterTex, float2(sin(i.uv.x+_Time.y/150.f),
+                    //    //                                          sin(i.uv.y+_Time.y/100.0f)));
+                    //    //fixed4 col_rand2 = tex2D(_WaterTex, float2(sin(i.uv.x+_Time.y/100.f),
+                    //    //                                          sin(i.uv.y+_Time.y/150.0f)));
+                    //    //col = col_rand1 + col_rand2;
+                    //    //col = normalize(col);
 
-                        float2 flowVector = tex2D(_FlowTex, i.uv).rg * 2 - 1;
-                        float noise = tex2D(_FlowTex, i.uv).a;
-                        float time = _Time.y + noise;
-                        float3 uvwA = FlowUVW(i.uv, flowVector, time * 0.1f, true);
-                        float3 uvwB = FlowUVW(i.uv, flowVector, time * 0.1f, false);
-                        //col = tex2D(_WaterTex, uvwA.xy) * uvwA.z;
-                        col = tex2D(_WaterTex, uvwA.xy) * uvwA.z + tex2D(_WaterTex, uvwB.xy) * uvwB.z;
-                        //col = fixed4(uvw.x, uvw.y, uvw.z, 0);
-                        //col = fixed4(0,0,1,1);
-                    }
+                    //    float2 flowVector = tex2D(_FlowTex, i.uv).rg * 2 - 1;
+                    //    float noise = tex2D(_FlowTex, i.uv).a;
+                    //    float time = _Time.y + noise;
+                    //    float3 uvwA = FlowUVW(i.uv, flowVector, time * 0.1f, true);
+                    //    float3 uvwB = FlowUVW(i.uv, flowVector, time * 0.1f, false);
+                    //    //col = tex2D(_WaterTex, uvwA.xy) * uvwA.z;
+                    //    col = tex2D(_WaterTex, uvwA.xy) * uvwA.z + tex2D(_WaterTex, uvwB.xy) * uvwB.z;
+                    //    //col = fixed4(uvw.x, uvw.y, uvw.z, 0);
+                    //    //col = fixed4(0,0,1,1);
+                    //}
 
                     // apply fog
                     UNITY_APPLY_FOG(i.fogCoord, col);
