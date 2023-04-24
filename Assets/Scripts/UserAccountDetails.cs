@@ -15,9 +15,12 @@ public class UserAccountDetails : MonoBehaviour
     public List<LeaderBoardEntry> leaderBoardList = new List<LeaderBoardEntry>();
 
     GameObject userAccountDetails;
-    private void Awake()
+
+
+    public void Awake()
     {
         DontDestroyOnLoad(gameObject);
+
 
         if (userAccountDetails == null)
         {
@@ -29,7 +32,9 @@ public class UserAccountDetails : MonoBehaviour
         auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
 
         UserInfo.OnUserAuthStateChanged += UserInfo_OnUserAuthStateChanged;
+        
     }
+    
 
     private void UserInfo_OnUserAuthStateChanged(bool isSignedIn)
     {
@@ -70,7 +75,10 @@ public class UserAccountDetails : MonoBehaviour
 
                 await dbReference.Child("users").Child(userId).SetRawJsonValueAsync(json);
                 
-                dbBestTime = float.Parse(dataSnapshot.Child("BestLapTime").GetRawJsonValue().ToString().Substring(0, 4).Replace('.', ','));
+                dbBestTime = float.Parse(dataSnapshot.Child("BestLapTime").GetRawJsonValue().ToString().Substring(0, 4));
+                Debug.LogWarning("Aika: Tallennettu: " + dbBestTime);
+                lapTimer.BestLaptime = dbBestTime;
+                
 
             }
         }
@@ -84,6 +92,10 @@ public class UserAccountDetails : MonoBehaviour
 
         if (userDetails != null)
         {
+            lapTimer.BestLaptime = dbBestTime;
+            userDetails.BestLapTime = dbBestTime;
+            
+
             Debug.Log(userDetails.UserName + " | BestLapTime : " + userDetails.BestLapTime);
         }
         GetLeaderBoards();
@@ -92,7 +104,7 @@ public class UserAccountDetails : MonoBehaviour
     public void UpdateLapCountAndTime()
     {
         lapTimer = FindObjectOfType<LapCounter>();
-        Debug.Log(lapTimer);
+        Debug.LogWarning("Aika: P‰vitet‰‰n: " + dbBestTime);
         ReadWriteUserDetails(auth.CurrentUser.Email, lapTimer.Getlapcount(), lapTimer.GetlapTime());
     }
 
@@ -129,9 +141,11 @@ public class UserAccountDetails : MonoBehaviour
 
                 foreach (DataSnapshot child in dataSnapshot.Children)
                 {
+                    Debug.LogWarning("Aika: Leaderboard: " + dbBestTime);
                     string name = child.Child("UserName").GetRawJsonValue().ToString();
                     string tempscore = child.Child("BestLapTime").GetRawJsonValue().ToString().Substring(0, 4);
-                    float score = float.Parse(tempscore.Replace('.', ','));
+                    float score = float.Parse(tempscore);
+
 
                     LeaderBoardEntry entry = new LeaderBoardEntry(name, score);
 
