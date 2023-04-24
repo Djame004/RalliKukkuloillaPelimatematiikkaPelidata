@@ -60,8 +60,8 @@ public class GeneratePlane : MonoBehaviour
             {
                 y = (float)seg_y * delta;
 
-                float z1 = Factor1 * (Mathf.PerlinNoise(x / 39f, y / 39f) - 0.5f);
-                float z2 = Factor2 * (Mathf.PerlinNoise(x / 17f, y / 17f) - 0.5f);
+                float z1 = Factor1 * (Mathf.PerlinNoise(x / 100f, y / 100f) - 0.5f);
+                float z2 = Factor2 * (Mathf.PerlinNoise(x / 50f, y / 50f) - 0.5f);
                 float z3 = Factor3 * (Mathf.PerlinNoise(x / 7f, y / 7f) - 0.5f);
                 float z4 = Factor4 * (Mathf.PerlinNoise(x, y) - 0.5f);
                 float z = z1 + z2 + z3 + z4;
