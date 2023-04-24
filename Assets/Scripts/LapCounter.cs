@@ -21,20 +21,14 @@ public class LapCounter : MonoBehaviour
 
   
 
-    public void Awake()
+    private void Start()
     {
         userAccountDetails = FindObjectOfType<UserAccountDetails>();
         userAccountDetails.UpdateLapCountAndTime();
-        Debug.LogWarning("Aika: dbBestTime: " + userAccountDetails.dbBestTime);
-        BestLaptime = userAccountDetails.dbBestTime;
-        Debug.LogWarning("Aika: BestLapTime: " + BestLaptime);
     }
 
     void Update()
     {
-        
-           
-        
         distFinish = Vector3.Distance(transform.position, car.transform.position);
         //Aseta lapCounter: true kun auto on colliderin sisällä
         if (distFinish < colliderCheck)
@@ -59,12 +53,10 @@ public class LapCounter : MonoBehaviour
             BestLaptime = userAccountDetails.dbBestTime;
             if (CurrentLapTime < BestLaptime)
             {
-                Debug.LogWarning("Aika: Perse Lap time" + BestLaptime + " ja " + CurrentLapTime);
                 BestLaptime = CurrentLapTime;
-                Debug.LogWarning("Aika: Perseen jälkee Lap time" + BestLaptime + " ja " + CurrentLapTime);
 
                 userAccountDetails.UpdateLapCountAndTime();
-                Debug.LogWarning("Aika: Account data Personal best time: " + userAccountDetails.dbBestTime);
+                Debug.LogWarning("Aika: Account data Personal Space: " + userAccountDetails.dbBestTime);
 
                 Debug.LogWarning("Aika: Personal Best: " + BestLaptime);
             }
@@ -83,8 +75,6 @@ public class LapCounter : MonoBehaviour
     }
     public float GetlapTime()
     {
-
-        //BestLaptime = userAccountDetails.dbBestTime;
         return BestLaptime;
     }
     private void OnDrawGizmos()
