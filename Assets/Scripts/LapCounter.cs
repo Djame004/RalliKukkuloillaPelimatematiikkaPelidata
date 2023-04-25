@@ -17,13 +17,21 @@ public class LapCounter : MonoBehaviour
     public GameObject[] particleEffects;
     public float CurrentLapTime = 9999999;
     public float BestLaptime = 9999999;
+    public float dbBestTime = 9999;
+
+    public bool hasCompletedLap = false;
 
 
-  
+
 
     private void Start()
     {
         userAccountDetails = FindObjectOfType<UserAccountDetails>();
+        Debug.Log("LapCounter time:" + BestLaptime);
+
+        BestLaptime = dbBestTime;
+
+        Debug.Log("LapCounter new time:" + BestLaptime);
         userAccountDetails.UpdateLapCountAndTime();
     }
 
@@ -39,6 +47,7 @@ public class LapCounter : MonoBehaviour
         if (distFinish > colliderCheck && lapCounter)
         {
             currentLapCount++;
+            hasCompletedLap = true;
             lapCounter = false;
 
             if (currentLapCount > lapCount)
@@ -50,13 +59,14 @@ public class LapCounter : MonoBehaviour
                     StartCoroutine(ParticleSpawner(particleEffect));
                 }
             }
-            BestLaptime = userAccountDetails.dbBestTime;
+
+            BestLaptime = dbBestTime;
             if (CurrentLapTime < BestLaptime)
             {
                 BestLaptime = CurrentLapTime;
 
                 userAccountDetails.UpdateLapCountAndTime();
-                Debug.LogWarning("Aika: Account data Personal Space: " + userAccountDetails.dbBestTime);
+                Debug.LogWarning("Aika: Account data Personal Space: " + dbBestTime);
 
                 Debug.LogWarning("Aika: Personal Best: " + BestLaptime);
             }

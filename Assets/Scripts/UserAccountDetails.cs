@@ -11,13 +11,13 @@ public class UserAccountDetails : MonoBehaviour
     private DatabaseReference dbReference;
     private Firebase.Auth.FirebaseAuth auth;
     public LapCounter lapTimer;
-    public float dbBestTime;
     public List<LeaderBoardEntry> leaderBoardList = new List<LeaderBoardEntry>();
 
     GameObject userAccountDetails;
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
+        
 
         if (userAccountDetails == null)
         {
@@ -29,6 +29,7 @@ public class UserAccountDetails : MonoBehaviour
         auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
 
         UserInfo.OnUserAuthStateChanged += UserInfo_OnUserAuthStateChanged;
+
     }
 
     private void UserInfo_OnUserAuthStateChanged(bool isSignedIn)
@@ -38,13 +39,15 @@ public class UserAccountDetails : MonoBehaviour
             ReadWriteUserDetails(auth.CurrentUser.Email, 0, lapTimer.GetlapTime());
     }
 
-    private async void ReadWriteUserDetails(string username, float LapCount, float lapTime)
+    public async void ReadWriteUserDetails(string username, float LapCount, float lapTime)
     {
         UserDetails userDetails = null;
 
         Task<DataSnapshot> task = FirebaseDatabase.DefaultInstance
             .GetReference("users/" + auth.CurrentUser.UserId + "/")
             .GetValueAsync();
+
+
 
         await task;
 
@@ -53,24 +56,39 @@ public class UserAccountDetails : MonoBehaviour
             DataSnapshot dataSnapshot = task.Result;
             if (!dataSnapshot.Exists)
             {
+                Debug.Log("User Has NO Data");
                 userDetails = new UserDetails(username, 0, 9999999);
                 string json = JsonUtility.ToJson(userDetails);
                 string userId = auth.CurrentUser.UserId;
 
                 await dbReference.Child("users").Child(userId).SetRawJsonValueAsync(json);
                 Debug.Log("New user added: " + username);
-                dbBestTime = 9999999;
+                lapTimer.dbBestTime = 9999999;
             }
 
             else
             {
-                userDetails = new UserDetails(username, LapCount, lapTime);
+                Debug.Log("User Has Data!");
+                Debug.Log("Got time: " + float.Parse(dataSnapshot.Child("BestLapTime").GetRawJsonValue().ToString().Substring(0, 4).Replace('.', ',')));
+                if(lapTimer.hasCompletedLap)
+                {
+                    userDetails = new UserDetails(username, LapCount, lapTime);
+                }
+               else
+                {
+                    userDetails = new UserDetails(username, LapCount, float.Parse(dataSnapshot.Child("BestLapTime").GetRawJsonValue().ToString().Substring(0, 4).Replace('.', ',')));
+                }
+
+                Debug.Log("Laptime: " + lapTime + " will be set to best lap time from data: " + float.Parse(dataSnapshot.Child("BestLapTime").GetRawJsonValue().ToString().Substring(0, 4).Replace('.', ',')));
+
+
+                
                 string json = JsonUtility.ToJson(userDetails);
                 string userId = auth.CurrentUser.UserId;
 
                 await dbReference.Child("users").Child(userId).SetRawJsonValueAsync(json);
-                
-                dbBestTime = float.Parse(dataSnapshot.Child("BestLapTime").GetRawJsonValue().ToString().Substring(0, 4).Replace('.', ','));
+
+                lapTimer.dbBestTime = float.Parse(dataSnapshot.Child("BestLapTime").GetRawJsonValue().ToString().Substring(0, 4).Replace('.', ','));
 
             }
         }
@@ -84,6 +102,8 @@ public class UserAccountDetails : MonoBehaviour
 
         if (userDetails != null)
         {
+            Debug.Log("User details set to: " + lapTimer.dbBestTime);
+            userDetails.BestLapTime = lapTimer.dbBestTime;
             Debug.Log(userDetails.UserName + " | BestLapTime : " + userDetails.BestLapTime);
         }
         GetLeaderBoards();
@@ -130,7 +150,9 @@ public class UserAccountDetails : MonoBehaviour
                 foreach (DataSnapshot child in dataSnapshot.Children)
                 {
                     string name = child.Child("UserName").GetRawJsonValue().ToString();
-                    string tempscore = child.Child("BestLapTime").GetRawJsonValue().ToString().Substring(0, 4);
+                    string rawValue = child.Child("BestLapTime").GetRawJsonValue().ToString();
+                    string tempscore = rawValue.Length >= 4 ? rawValue.Substring(0, 4) : rawValue;
+
                     float score = float.Parse(tempscore.Replace('.', ','));
 
                     LeaderBoardEntry entry = new LeaderBoardEntry(name, score);

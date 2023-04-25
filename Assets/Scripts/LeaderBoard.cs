@@ -22,7 +22,15 @@ public class LeaderBoard : MonoBehaviour
         {
            
             userName[i].text = userAccountDetails.leaderBoardList[i].Name;
-            bestTime[i].text = userAccountDetails.leaderBoardList[i].Time.ToString();
+            if(userAccountDetails.leaderBoardList[i].Time == 9999)
+            {
+                bestTime[i].text = "Waiting for DB";
+            }
+            else
+            {
+                bestTime[i].text = userAccountDetails.leaderBoardList[i].Time.ToString();
+            }
+
         }
 
     }

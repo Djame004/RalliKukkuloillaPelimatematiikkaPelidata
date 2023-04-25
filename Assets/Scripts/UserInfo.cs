@@ -56,12 +56,6 @@ public class UserInfo : MonoBehaviour
                 SignInSignUpPanel.gameObject.SetActive(false);
 
                 OnUserAuthStateChanged?.Invoke(true);
-                // Load Scene 1 if the user has signed in
-                SceneManager.LoadScene(1);
-
-
-
-
 
             }
 

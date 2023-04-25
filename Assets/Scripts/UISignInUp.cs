@@ -26,6 +26,10 @@ public class UISignInUp : MonoBehaviour
     //Reference to FirebaseAuth instance
     private Firebase.Auth.FirebaseAuth auth;
 
+    //Go to game
+    //public GameObject PlayButton;
+    //public Button StartButton;
+
     public bool SignInActive { get; private set; } = true;
     public void Awake()
     {
@@ -94,7 +98,10 @@ public class UISignInUp : MonoBehaviour
 
     void OnSuccesfullSignIn()
     {
+        //PlayButton.SetActive(true);
+
         SceneManager.LoadScene(1);
+
     }
 
     private async void SignInUserEmailPassword(string email, string password)
@@ -102,7 +109,7 @@ public class UISignInUp : MonoBehaviour
         Task<Firebase.Auth.FirebaseUser> task = auth.SignInWithEmailAndPasswordAsync(email, password);
             await task;
 
-        Debug.Log("JEE!!");
+        Debug.Log("Firabase works");
 
         try
         {
