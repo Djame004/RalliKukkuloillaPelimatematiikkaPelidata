@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,14 +7,29 @@ public class GeneratePlane : MonoBehaviour
 
     [Range(1.0f, 1000.0f)]
     public float Size = 10.0f;
+
     [Range(2, 255)]
     public int Segments = 10;
+
     private Mesh mesh = null;
+    public bool FlattenBelowZero = true;
 
-    public float noiseScale = 0.1f;
-    public float noiseStrength = 1.0f;
+    [Range(1f, 100f)]
+    public float NoiseFactor;
 
-    private void Awake()
+    [Range(-2f, 1f)]
+    public float Flattener;
+
+    [Range(0f, 10f)]
+    public float Factor1;
+    [Range(0f, 10f)]
+    public float Factor2;
+    [Range(0f, 10f)]
+    public float Factor3;
+    [Range(0f, 10f)]
+    public float Factor4;
+
+    private void OnEnable()
     {
         if (mesh == null)
         {
@@ -45,7 +59,17 @@ public class GeneratePlane : MonoBehaviour
             for (int seg_y = 0; seg_y <= Segments; seg_y++)
             {
                 y = (float)seg_y * delta;
-                verts.Add(new Vector3(x, 0.0f, y));
+
+                float z1 = Factor1 * (Mathf.PerlinNoise(x / 100f, y / 100f) - 0.5f);
+                float z2 = Factor2 * (Mathf.PerlinNoise(x / 50f, y / 50f) - 0.5f);
+                float z3 = Factor3 * (Mathf.PerlinNoise(x / 7f, y / 7f) - 0.5f);
+                float z4 = Factor4 * (Mathf.PerlinNoise(x, y) - 0.5f);
+                float z = z1 + z2 + z3 + z4;
+                //float z = (Mathf.PerlinNoise(x, y) - 0.5f);
+                if (FlattenBelowZero && z < Flattener)
+                    z = Flattener;
+
+                verts.Add(new Vector3(x, z * NoiseFactor, y));
             }
         }
 
@@ -84,19 +108,7 @@ public class GeneratePlane : MonoBehaviour
         }
 
         GenerateMesh();
-        AddNoiseToMesh(mesh);
-    }
-
-    void AddNoiseToMesh(Mesh mesh)
-    {
-        Vector3[] vertices = mesh.vertices;
-        for (int i = 0; i < vertices.Length; i++)
-        {
-            float noiseValue = Mathf.Clamp01(Mathf.PerlinNoise(vertices[i].x * noiseScale, vertices[i].z * noiseScale) * noiseStrength);
-            vertices[i] += Vector3.up * noiseValue;
-        }
-        mesh.vertices = vertices;
-        mesh.RecalculateNormals();
+        //AddNoiseToMesh(mesh);
     }
 
     // Start is called before the first frame update
