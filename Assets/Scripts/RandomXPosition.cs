@@ -6,6 +6,7 @@ public class RandomXPosition : MonoBehaviour
     public float randomX;
     public PlaneTrigger planeTrigger;
     public PlaneTrigger planeTrigger2;
+    public PlaneTrigger planeTrigger3;
     private bool hasRandomPosition = false;
 
     void Start()
@@ -26,8 +27,15 @@ public class RandomXPosition : MonoBehaviour
             Debug.Log("Random X position: " + randomX);
             hasRandomPosition = true;
         }
+        if (planeTrigger3.isInside && !hasRandomPosition)
+        {
+            CalculateRandomXPosition();
+            Debug.Log("Random X position: " + randomX);
+            hasRandomPosition = true;
+        }
 
-        if (!planeTrigger.isInside && !planeTrigger2.isInside)
+
+        if (!planeTrigger.isInside && !planeTrigger2.isInside && !planeTrigger3.isInside)
         {
             hasRandomPosition = false;
         }
