@@ -18,7 +18,7 @@ public class UserInfo : MonoBehaviour
 
     private Firebase.Auth.FirebaseAuth auth;
     private Firebase.Auth.FirebaseUser user;
-    // Start is called before the first frame update
+   
     void Awake()
     {
         auth.SignOut();
@@ -29,7 +29,6 @@ public class UserInfo : MonoBehaviour
         ButtonSignOut.onClick.AddListener(()=> auth.SignOut());
     }
 
-    // Update is called once per frame
     void AuthStateChanged(object sender, System.EventArgs eventArgs)
     {
         if (auth.CurrentUser != user)

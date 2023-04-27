@@ -21,9 +21,6 @@ public class LapCounter : MonoBehaviour
 
     public bool hasCompletedLap = false;
 
-
-
-
     private void Start()
     {
         userAccountDetails = FindObjectOfType<UserAccountDetails>();
@@ -55,12 +52,13 @@ public class LapCounter : MonoBehaviour
                 lapCount = currentLapCount;
                 userAccountDetails.UpdateLapCountAndTime();
                 foreach (GameObject particleEffect in particleEffects)
-                {
+                {   
                     StartCoroutine(ParticleSpawner(particleEffect));
                 }
             }
 
             BestLaptime = dbBestTime;
+            //jos pelaajaa saa paremman kierrosajan, p‰ivitet‰‰n se listaan
             if (CurrentLapTime < BestLaptime)
             {
                 BestLaptime = CurrentLapTime;

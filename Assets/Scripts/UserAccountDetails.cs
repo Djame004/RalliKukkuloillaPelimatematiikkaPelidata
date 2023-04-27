@@ -52,28 +52,29 @@ public class UserAccountDetails : MonoBehaviour
         await task;
 
         try
-        {
+        {   
+            //onko pelaajalla dataa
             DataSnapshot dataSnapshot = task.Result;
-            if (!dataSnapshot.Exists)
-            {
+            if (!dataSnapshot.Exists) //jos ei, niin luodaan uusi 
+            {   
                 Debug.Log("User Has NO Data");
                 userDetails = new UserDetails(username, 0, 9999999);
-                string json = JsonUtility.ToJson(userDetails);
+                string json = JsonUtility.ToJson(userDetails); //tallentaa pelaajan tiedot json muotoon
                 string userId = auth.CurrentUser.UserId;
 
+                //asettaa default arvot
                 await dbReference.Child("users").Child(userId).SetRawJsonValueAsync(json);
                 Debug.Log("New user added: " + username);
                 lapTimer.dbBestTime = 9999999;
             }
-
+            //dataa on olemassa
             else
             {
-                Debug.Log("User Has Data!");
-                Debug.Log("Got time: " + float.Parse(dataSnapshot.Child("BestLapTime").GetRawJsonValue().ToString().Substring(0, 4).Replace('.', ',')));
-                if(lapTimer.hasCompletedLap)
+                if (lapTimer.hasCompletedLap)
                 {
                     userDetails = new UserDetails(username, LapCount, lapTime);
                 }
+                //kun kirjaudutaan sis‰‰n, haetaan tiedot
                else
                 {
                     userDetails = new UserDetails(username, LapCount, float.Parse(dataSnapshot.Child("BestLapTime").GetRawJsonValue().ToString().Substring(0, 4).Replace('.', ',')));
@@ -87,7 +88,7 @@ public class UserAccountDetails : MonoBehaviour
                 string userId = auth.CurrentUser.UserId;
 
                 await dbReference.Child("users").Child(userId).SetRawJsonValueAsync(json);
-
+                //asettaa uuden kierrosajan
                 lapTimer.dbBestTime = float.Parse(dataSnapshot.Child("BestLapTime").GetRawJsonValue().ToString().Substring(0, 4).Replace('.', ','));
 
             }
@@ -106,6 +107,7 @@ public class UserAccountDetails : MonoBehaviour
             userDetails.BestLapTime = lapTimer.dbBestTime;
             Debug.Log(userDetails.UserName + " | BestLapTime : " + userDetails.BestLapTime);
         }
+       
         GetLeaderBoards();
     }
 
